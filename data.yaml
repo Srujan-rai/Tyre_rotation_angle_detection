@@ -1,0 +1,12 @@
+names:
+- tyre
+nc: 1
+roboflow:
+  license: CC BY 4.0
+  project: tyre-detection-tvdhu
+  url: https://universe.roboflow.com/srujan/tyre-detection-tvdhu/dataset/1
+  version: 1
+  workspace: srujan
+test: ../test/images
+train: tyre-detection-1/train/images
+val: tyre-detection-1/valid/images
