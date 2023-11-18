@@ -1,6 +1,6 @@
 from ultralytics import YOLO
 import cv2
-
+import numpy as np
 # Initialize YOLO model and camera
 model = YOLO('best.pt')
 cap = cv2.VideoCapture(0)
