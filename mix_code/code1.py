@@ -1,7 +1,6 @@
 from ultralytics import YOLO
 import cv2
 import numpy as np
-import math
 
 # Initialize YOLO model and camera
 model = YOLO('best.pt')
@@ -13,6 +12,7 @@ lk_params = dict(winSize=(15, 15), maxLevel=2, criteria=(cv2.TERM_CRITERIA_EPS |
 
 # Create windows for displaying frames
 cv2.namedWindow('Original with Bounding Box', cv2.WINDOW_NORMAL)
+cv2.namedWindow('Tire Rotation Tracking', cv2.WINDOW_NORMAL)
 
 # Read the first frame
 ret, old_frame = cap.read()
@@ -28,6 +28,9 @@ while True:
     ret, frame = cap.read()
     if not ret:
         break
+
+    # Reset the mask
+    mask = np.zeros_like(old_frame)
 
     results = model(frame, conf=0.6)
 
@@ -79,7 +82,8 @@ while True:
     cv2.imshow('Original with Bounding Box', frame)
 
     # Wait for a key press and close windows if 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    key = cv2.waitKey(1)
+    if key == ord('q'):
         break
 
 # Release resources
