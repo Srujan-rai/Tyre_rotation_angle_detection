@@ -13,7 +13,8 @@ def calculate_rotation_angle(initial_image_path, current_image_path):
     # Use a small region of interest (ROI) as the template (adjust as needed)
     template_size = (50, 50)
     roi_initial = initial_gray[100:100 + template_size[1], 100:100 + template_size[0]]
-
+    cv2.imshow("roi",roi_initial)
+    cv2.waitKey(0)
     # Perform template matching
     result = cv2.matchTemplate(current_gray, roi_initial, cv2.TM_CCOEFF_NORMED)
 
@@ -36,7 +37,7 @@ def calculate_rotation_angle(initial_image_path, current_image_path):
 
 # Example usage:
 initial_image_path = 'images.jpeg'
-current_image_path = 'images.jpeg'
+current_image_path = 'images1.jpeg'
 
 rotation_angle = calculate_rotation_angle(initial_image_path, current_image_path)
 
