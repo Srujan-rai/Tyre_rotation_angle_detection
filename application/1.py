@@ -18,40 +18,43 @@ class TireRotationApp:
 
         # Initialize video capture
         self.cap = cv2.VideoCapture(0)
-        self.root.after(1, self.update_video_feed)
+        _, self.frame = self.cap.read()
+
+        # Convert frame to PhotoImage format for display in Tkinter
+        self.image_tk = self.convert_frame_to_photoimage(self.frame)
+
+        # Display the current frame
+        self.image_label = tk.Label(self.root, image=self.image_tk)
+        self.image_label.image = self.image_tk
+        self.image_label.pack(pady=10)
+
+        # Start continuous update
+        self.root.after(10, self.update)
 
     def capture_image(self):
         # Capture initial image from camera
-        ret, frame = self.cap.read()
+        _, self.initial_image = self.cap.read()
 
-        # Convert frame to PhotoImage format for display in Tkinter
-        image_tk = self.convert_frame_to_photoimage(frame)
-
-        # Display the captured image
-        self.display_image(image_tk)
-
-        # Save the captured image for template matching
-        self.initial_image = frame
-
-    def update_video_feed(self):
+    def update(self):
         # Capture current frame from camera
-        ret, frame = self.cap.read()
+        _, current_frame = self.cap.read()
 
         # If an initial image is captured, calculate the rotation angle
         if self.initial_image is not None:
-            rotation_angle = self.calculate_rotation_angle_template_matching(self.initial_image, frame)
+            rotation_angle = self.calculate_rotation_angle_template_matching(self.initial_image, current_frame)
 
             # Update the angle label
             self.angle_label.config(text=f"Rotation Angle: {rotation_angle:.2f} degrees")
 
         # Convert frame to PhotoImage format for display in Tkinter
-        image_tk = self.convert_frame_to_photoimage(frame)
+        self.image_tk = self.convert_frame_to_photoimage(current_frame)
 
-        # Display the current frame
-        self.display_image(image_tk)
+        # Update the displayed image
+        self.image_label.configure(image=self.image_tk)
+        self.image_label.image = self.image_tk
 
         # Continue updating the video feed and angle continuously
-        self.root.after(1, self.update_video_feed)
+        self.root.after(10, self.update)
 
     def calculate_rotation_angle_template_matching(self, initial_image, current_frame):
         # Convert images to grayscale
@@ -64,11 +67,11 @@ class TireRotationApp:
         # Find the location of the best match
         _, _, _, max_loc = cv2.minMaxLoc(result)
 
-        # Calculate the center coordinates of the template in the current frame
-        template_center = (max_loc[0] + initial_image.shape[1] // 2, max_loc[1] + initial_image.shape[0] // 2)
-
         # Calculate the displacement vector
-        displacement_vector = (template_center[0] - current_frame.shape[1] // 2, template_center[1] - current_frame.shape[0] // 2)
+        displacement_vector = (
+            max_loc[0] + initial_image.shape[1] // 2 - current_frame.shape[1] // 2,
+            max_loc[1] + initial_image.shape[0] // 2 - current_frame.shape[0] // 2
+        )
 
         # Calculate the angle of rotation using arctangent
         angle_of_rotation_radians = np.arctan2(displacement_vector[1], displacement_vector[0])
@@ -92,15 +95,6 @@ class TireRotationApp:
         image_tk = ImageTk.PhotoImage(Image.fromarray(frame_resized))
 
         return image_tk
-
-    def display_image(self, image_tk):
-        # Display the image
-        if hasattr(self, 'image_label'):
-            self.image_label.destroy()  # Destroy the previous image label
-
-        self.image_label = tk.Label(self.root, image=image_tk)
-        self.image_label.image = image_tk
-        self.image_label.pack(pady=10)
 
 if __name__ == "__main__":
     root = tk.Tk()
